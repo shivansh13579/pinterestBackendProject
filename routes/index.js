@@ -33,6 +33,13 @@ router.get('/show/posts',isLoggedIn,async function(req,res,next){
   res.render("show",{user,nav: true});  
 });
 
+router.get('/feed',isLoggedIn,async function(req,res,next){
+  const user =  await userModel.findOne({username: req.session.passport.user})  
+  const posts = await postModel.find()
+  .populate("user")
+  res.render("feed",{user,posts,nav: true});
+});
+
 router.get('/add',isLoggedIn,async function(req,res,next){
       const user =await userModel.findOne({username: req.session.passport.user});
       res.render("add",{user,nav: true});
@@ -52,12 +59,7 @@ router.post('/createpost',isLoggedIn,upload.single("postimage"),async function(r
   res.redirect("/profile");
 });
 
-// router.post('/fileupload',isLoggedIn, upload.single("image"),async function(req,res,next){
-//     const user = await userModel.findOne({username: req.session.passport.user})
-//     user.profileImage = req.file.filename;
-//     user.save();
-//     res.redirect("/profile");
-// })
+
 router.post('/fileupload',isLoggedIn,upload.single("image"),async function(req,res,next){
    const user = await userModel.findOne({username: req.session.passport.user});
    user.profileImage = req.file.filename;
@@ -69,7 +71,8 @@ router.post('/register',function(req,res,next){
   const data = new userModel({
     username: req.body.username,
     email: req.body.email,
-    contact: req.body.contact
+    contact: req.body.contact,
+    name: req.body.fullname
   })
 
   userModel.register(data,req.body.password)
